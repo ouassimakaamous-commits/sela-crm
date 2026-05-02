@@ -1,9 +1,9 @@
-node_modules
-dist
-dist-ssr
-*.local
+node_modules/
+dist/
+dist-ssr/
 .env
 .env.local
-.env.production.local
+.env.*.local
+*.log
 .DS_Store
 .vercel
