@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { ChevronRight, Menu, Bell } from 'lucide-react'
 import Sidebar from './Sidebar'
 import AlertsPanel from './AlertsPanel'
-import { useAuth } from '../../context/AuthContext'
+import UserAvatar from './UserAvatar'
 
 const BREADCRUMB_MAP = {
   '/dashboard':    'Tableau de Bord',
@@ -22,7 +22,6 @@ const UNREAD_COUNT = 2
 
 export default function Layout({ children }) {
   const location = useLocation()
-  const { user } = useAuth()
 
   const [mobileNavOpen,    setMobileNavOpen]    = useState(false)
   const [sidebarExpanded,  setSidebarExpanded]  = useState(true)
@@ -30,10 +29,6 @@ export default function Layout({ children }) {
   const [alertsOpen,       setAlertsOpen]       = useState(false)
 
   const currentPage = BREADCRUMB_MAP[location.pathname] || 'Page'
-
-  const initials = user?.name
-    ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-    : 'SA'
 
   // Auto-show alerts panel once per session on first load
   useEffect(() => {
@@ -102,9 +97,7 @@ export default function Layout({ children }) {
                 <span className="text-[7px] text-white font-bold leading-none">{UNREAD_COUNT}</span>
               </span>
             </button>
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">
-              {initials}
-            </div>
+            <UserAvatar size="md" />
           </div>
         </div>
 
