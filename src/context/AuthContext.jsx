@@ -7,13 +7,14 @@ export const ROLES = {
   FORMATEUR: 'formateur',
 }
 
-const USERS = {
-  'admin@centresela.ma': {
+const USERS = [
+  {
+    email: 'admin@centresela.ma',
     password: 'SelaAdmin2026!',
     role: ROLES.ADMIN,
-    name: 'Administrateur SELA',
+    name: 'Administrateur',
   },
-}
+]
 
 const AuthContext = createContext(null)
 
@@ -26,14 +27,13 @@ export function AuthProvider({ children }) {
   })
 
   const login = (email, password) => {
-    const cred = USERS[email.toLowerCase().trim()]
-    if (!cred || cred.password !== password) {
-      throw new Error('Email ou mot de passe incorrect')
-    }
-    const userData = { email, role: cred.role, name: cred.name }
+    const normalized = email.toLowerCase().trim()
+    const found = USERS.find(u => u.email === normalized && u.password === password)
+    if (!found) return { success: false }
+    const userData = { email: found.email, role: found.role, name: found.name, loggedAt: Date.now() }
     localStorage.setItem('sela_auth', JSON.stringify(userData))
     setUser(userData)
-    return userData
+    return { success: true }
   }
 
   const logout = () => {
