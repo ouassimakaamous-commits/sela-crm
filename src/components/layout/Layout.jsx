@@ -1,34 +1,51 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { ChevronRight, Menu, Bell } from 'lucide-react'
 import Sidebar from './Sidebar'
+import AlertsPanel from './AlertsPanel'
 import { useAuth } from '../../context/AuthContext'
 
 const BREADCRUMB_MAP = {
-  '/dashboard':  'Tableau de Bord',
-  '/formateurs': 'Formateurs',
-  '/apprenants': 'Apprenants',
-  '/sessions':   'Sessions',
-  '/heures-sup': 'Heures Supplémentaires',
-  '/documents':  'Documents',
-  '/finances':   'Finances',
-  '/rapports':   'Rapports',
-  '/parametres': 'Paramètres',
+  '/dashboard':    'Tableau de Bord',
+  '/formateurs':   'Formateurs',
+  '/apprenants':   'Apprenants',
+  '/sessions':     'Sessions',
+  '/heures-sup':   'Heures Supplémentaires',
+  '/documents':    'Documents',
+  '/finances':     'Finances',
+  '/rapports':     'Rapports',
+  '/parametres':   'Paramètres',
   '/utilisateurs': 'Utilisateurs',
 }
+
+const UNREAD_COUNT = 2
 
 export default function Layout({ children }) {
   const location = useLocation()
   const { user } = useAuth()
-  const [mobileNavOpen, setMobileNavOpen]   = useState(false)
-  const [sidebarExpanded, setSidebarExpanded] = useState(true)
-  const [sidebarLocked, setSidebarLocked]   = useState(true)
+
+  const [mobileNavOpen,    setMobileNavOpen]    = useState(false)
+  const [sidebarExpanded,  setSidebarExpanded]  = useState(true)
+  const [sidebarLocked,    setSidebarLocked]    = useState(true)
+  const [alertsOpen,       setAlertsOpen]       = useState(false)
 
   const currentPage = BREADCRUMB_MAP[location.pathname] || 'Page'
 
   const initials = user?.name
     ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
     : 'SA'
+
+  // Auto-show alerts panel once per session on first load
+  useEffect(() => {
+    const shown = sessionStorage.getItem('sela_alerts_shown')
+    if (!shown) {
+      const t = setTimeout(() => {
+        setAlertsOpen(true)
+        sessionStorage.setItem('sela_alerts_shown', '1')
+      }, 600)
+      return () => clearTimeout(t)
+    }
+  }, [])
 
   const marginLeft = sidebarExpanded ? 'md:ml-[240px]' : 'md:ml-[68px]'
 
@@ -51,10 +68,14 @@ export default function Layout({ children }) {
         />
       )}
 
+      {/* Alerts panel */}
+      <AlertsPanel open={alertsOpen} onClose={() => setAlertsOpen(false)} />
+
       {/* Main content */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${marginLeft}`}>
         {/* Top header bar */}
         <div className="sticky top-0 z-30 bg-white border-b border-border flex items-center justify-between px-4 md:px-6 h-14">
+
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileNavOpen(o => !o)}
@@ -72,9 +93,14 @@ export default function Layout({ children }) {
 
           {/* Right: bell + avatar */}
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-xl bg-bg hover:bg-border flex items-center justify-center transition-colors">
+            <button
+              onClick={() => setAlertsOpen(o => !o)}
+              className="relative w-9 h-9 rounded-xl bg-bg hover:bg-border flex items-center justify-center transition-colors"
+            >
               <Bell size={16} className="text-text2" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-[7px] text-white font-bold leading-none">{UNREAD_COUNT}</span>
+              </span>
             </button>
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">
               {initials}
