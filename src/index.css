@@ -73,3 +73,100 @@ body {
 .recharts-tooltip-wrapper {
   outline: none;
 }
+
+/* ── react-calendar overrides ── */
+.react-calendar {
+  width: 100%;
+  border: none;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.react-calendar__navigation button {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.react-calendar__navigation button:hover {
+  background: #F4F6F8;
+  color: #00839F;
+}
+.react-calendar__navigation__label {
+  flex: 1;
+  font-weight: 700;
+  color: #0D1B2A;
+  font-size: 13px;
+}
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+}
+.react-calendar__tile {
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  transition: all 0.15s;
+}
+.react-calendar__tile:hover {
+  background: #E0F2F7;
+  color: #00839F;
+}
+.react-calendar__tile--now {
+  background: #E0F2F7;
+  color: #00839F;
+  font-weight: 700;
+}
+.react-calendar__tile--active,
+.react-calendar__tile--active:hover {
+  background: #00839F !important;
+  color: white !important;
+  font-weight: 700;
+}
+.react-calendar__tile--range {
+  background: #E0F2F7;
+}
+.react-calendar__month-view__days__day--weekend {
+  color: #EF4444;
+}
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #CBD5E0;
+}
+.react-calendar__tile.has-hs-dot {
+  position: relative;
+}
+.react-calendar__tile.has-hs-dot::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #DCA35A;
+}

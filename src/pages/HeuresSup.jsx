@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Search, CheckCircle, XCircle, Clock, AlertTriangle, Upload, Info } from 'lucide-react'
+import { Search, CheckCircle, XCircle, Clock, AlertTriangle, Upload, Info, CalendarDays } from 'lucide-react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import QuotaBar from '../components/common/QuotaBar'
@@ -33,17 +35,21 @@ export default function HeuresSup() {
   const [filterType, setFilterType] = useState('Tous')
   const [filterStatut, setFilterStatut] = useState('Tous')
   const [filterFormateur, setFilterFormateur] = useState('Tous')
+  const [filterDate, setFilterDate]   = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [bulkSelected, setBulkSelected] = useState([])
   const [data, setData] = useState(heuresSup)
 
   const filtered = data.filter(h => {
-    const ms = h.formateur.toLowerCase().includes(search.toLowerCase()) || h.session.toLowerCase().includes(search.toLowerCase())
-    const mt = filterType === 'Tous' || h.type === filterType
+    const ms  = h.formateur.toLowerCase().includes(search.toLowerCase()) || h.session.toLowerCase().includes(search.toLowerCase())
+    const mt  = filterType === 'Tous' || h.type === filterType
     const mst = filterStatut === 'Tous' || h.statut === filterStatut
-    const mf = filterFormateur === 'Tous' || h.formateur === filterFormateur
-    return ms && mt && mst && mf
+    const mf  = filterFormateur === 'Tous' || h.formateur === filterFormateur
+    const md  = !filterDate || h.date === filterDate.toISOString().slice(0, 10)
+    return ms && mt && mst && mf && md
   })
+
+  const datesWithHS = new Set(data.map(h => h.date))
 
   const totalHSA = data.filter(h => h.type === 'HSA' && h.statut !== 'Refusé').reduce((a, h) => a + h.heures, 0)
   const totalHSE = data.filter(h => h.type === 'HSE' && h.statut !== 'Refusé').reduce((a, h) => a + h.heures, 0)
@@ -261,7 +267,40 @@ export default function HeuresSup() {
         </div>
 
         {/* Quota Sidebar */}
-        <div className="w-full lg:w-72 lg:flex-shrink-0">
+        <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-4">
+          {/* Mini calendar */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold text-text1 text-sm flex items-center gap-2">
+                <CalendarDays size={14} className="text-primary" />
+                Filtrer par date
+              </p>
+              {filterDate && (
+                <button
+                  onClick={() => setFilterDate(null)}
+                  className="text-xs text-primary font-semibold hover:underline"
+                >
+                  Effacer
+                </button>
+              )}
+            </div>
+            <Calendar
+              onChange={setFilterDate}
+              value={filterDate}
+              locale="fr-MA"
+              tileClassName={({ date }) => {
+                const iso = date.toISOString().slice(0, 10)
+                return datesWithHS.has(iso) ? 'has-hs-dot' : null
+              }}
+            />
+            {filterDate && (
+              <p className="text-xs text-text3 mt-2 text-center">
+                Filtré: {filterDate.toLocaleDateString('fr-MA')}
+                {' · '}{filtered.length} entrée(s)
+              </p>
+            )}
+          </div>
+
           <div className="card p-4">
             <p className="font-bold text-text1 mb-4">Quota par formateur</p>
             <div className="space-y-4">

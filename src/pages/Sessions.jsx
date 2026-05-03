@@ -1,18 +1,27 @@
 import { useState } from 'react'
-import { Search, Calendar as CalIcon, List, Plus, Eye, Edit2, Users, Clock } from 'lucide-react'
+import { Search, Calendar as CalIcon, List, ChevronLeft, ChevronRight, Eye, Edit2, Users, Clock, X } from 'lucide-react'
 import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
 import { sessions, formateurs } from '../data/mockData'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, parseISO } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, parseISO, addMonths, subMonths } from 'date-fns'
+import { fr } from 'date-fns/locale'
+
+const STATUS_COLOR = {
+  'En cours':  { pill: 'bg-primary text-white',    dot: 'bg-primary' },
+  'Planifiée': { pill: 'bg-accent text-white',      dot: 'bg-accent' },
+  'Terminée':  { pill: 'bg-success text-white',     dot: 'bg-success' },
+}
 
 function CalendarView({ sessions }) {
-  const today = new Date(2025, 4, 1) // May 2025
-  const start = startOfMonth(today)
-  const end = endOfMonth(today)
-  const days = eachDayOfInterval({ start, end })
-  const startDow = getDay(start) === 0 ? 6 : getDay(start) - 1 // Mon-based
+  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 4, 1))
+  const [selectedDay, setSelectedDay]   = useState(null)
+
+  const start    = startOfMonth(currentMonth)
+  const end      = endOfMonth(currentMonth)
+  const days     = eachDayOfInterval({ start, end })
+  const startDow = getDay(start) === 0 ? 6 : getDay(start) - 1
 
   const getSessionsForDay = (day) =>
     sessions.filter(s => {
@@ -23,48 +32,121 @@ function CalendarView({ sessions }) {
       } catch { return false }
     })
 
-  const statusColor = {
-    'En cours': 'bg-primary text-white',
-    'Planifiée': 'bg-accent text-white',
-    'Terminée': 'bg-success text-white',
-  }
+  const selectedSessions = selectedDay ? getSessionsForDay(selectedDay) : []
 
   return (
     <div className="card p-5">
-      <div className="grid grid-cols-7 gap-1 mb-3">
+      {/* Month navigation */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setCurrentMonth(m => subMonths(m, 1))}
+          className="w-8 h-8 rounded-xl hover:bg-bg flex items-center justify-center text-text2 hover:text-primary transition-colors"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <h3 className="text-sm font-bold text-text1 capitalize">
+          {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+        </h3>
+        <button
+          onClick={() => setCurrentMonth(m => addMonths(m, 1))}
+          className="w-8 h-8 rounded-xl hover:bg-bg flex items-center justify-center text-text2 hover:text-primary transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
-          <div key={d} className="text-center text-xs font-bold text-text3 py-2">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-text3 py-1.5">{d}</div>
         ))}
       </div>
+
+      {/* Day cells */}
       <div className="grid grid-cols-7 gap-1">
         {Array(startDow).fill(null).map((_, i) => <div key={`e${i}`} />)}
         {days.map((day) => {
           const daySessions = getSessionsForDay(day)
-          const isToday = isSameDay(day, new Date(2025, 4, 10))
+          const isSelected  = selectedDay && isSameDay(day, selectedDay)
+          const isToday     = isSameDay(day, new Date())
+          const hasSessions = daySessions.length > 0
           return (
-            <div key={day.toISOString()} className={`min-h-[70px] rounded-xl p-1.5 border transition-colors ${isToday ? 'border-primary bg-primary-light' : 'border-border hover:border-primary/30'}`}>
-              <p className={`text-xs font-bold mb-1 ${isToday ? 'text-primary' : 'text-text2'}`}>
+            <button
+              key={day.toISOString()}
+              onClick={() => setSelectedDay(prev => prev && isSameDay(prev, day) ? null : day)}
+              className={`min-h-[68px] rounded-xl p-1.5 border text-left transition-all duration-150 ${
+                isSelected
+                  ? 'border-primary bg-primary-light shadow-sm'
+                  : isToday
+                  ? 'border-primary/40 bg-primary/5'
+                  : hasSessions
+                  ? 'border-border hover:border-primary/40 hover:bg-bg'
+                  : 'border-transparent hover:border-border'
+              }`}
+            >
+              <p className={`text-xs font-bold mb-1 ${isSelected || isToday ? 'text-primary' : 'text-text2'}`}>
                 {format(day, 'd')}
               </p>
               <div className="space-y-0.5">
-                {daySessions.slice(0, 2).map(s => (
-                  <div key={s.id} className={`text-[10px] font-semibold px-1 py-0.5 rounded truncate ${statusColor[s.statut] || 'bg-bg text-text2'}`}>
-                    {s.intitule.split(' ')[0]}
-                  </div>
-                ))}
+                {daySessions.slice(0, 2).map(s => {
+                  const cfg = STATUS_COLOR[s.statut] || { pill: 'bg-bg text-text2' }
+                  return (
+                    <div key={s.id} className={`text-[9px] font-semibold px-1 py-0.5 rounded truncate ${cfg.pill}`}>
+                      {s.intitule.split(' ').slice(0, 2).join(' ')}
+                    </div>
+                  )
+                })}
                 {daySessions.length > 2 && (
-                  <div className="text-[10px] text-text3 font-semibold">+{daySessions.length - 2}</div>
+                  <div className="text-[9px] text-text3 font-semibold">+{daySessions.length - 2} autre(s)</div>
                 )}
               </div>
-            </div>
+            </button>
           )
         })}
       </div>
-      <div className="flex gap-4 mt-4 text-xs">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary" /> En cours</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-accent" /> Planifiée</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-success" /> Terminée</span>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 mt-4 text-xs text-text3">
+        {Object.entries(STATUS_COLOR).map(([label, cfg]) => (
+          <span key={label} className="flex items-center gap-1.5">
+            <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
+            {label}
+          </span>
+        ))}
       </div>
+
+      {/* Day detail panel */}
+      {selectedDay && (
+        <div className="mt-4 border-t border-border pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-bold text-text1 capitalize">
+              {format(selectedDay, 'EEEE d MMMM yyyy', { locale: fr })}
+            </p>
+            <button onClick={() => setSelectedDay(null)} className="w-6 h-6 rounded-lg hover:bg-bg flex items-center justify-center text-text3">
+              <X size={12} />
+            </button>
+          </div>
+          {selectedSessions.length === 0 ? (
+            <p className="text-sm text-text3 text-center py-4">Aucune session ce jour</p>
+          ) : (
+            <div className="space-y-2">
+              {selectedSessions.map(s => {
+                const cfg = STATUS_COLOR[s.statut] || { pill: 'bg-bg text-text2' }
+                return (
+                  <div key={s.id} className="flex items-center gap-3 p-3 bg-bg rounded-xl">
+                    <span className={`w-2 h-8 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text1 truncate">{s.intitule}</p>
+                      <p className="text-xs text-text3">{s.formateur} · {s.salle} · {s.duree}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.pill}`}>{s.statut}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
