@@ -199,7 +199,7 @@ function TabQuotas() {
 
   return (
     <Section title="Configuration des quotas d'heures supplémentaires">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Quota mensuel par formateur (heures)">
           <input type="number" className="input" value={quotaMensuel} onChange={e => setQuotaMensuel(Number(e.target.value))} />
           <p className="text-xs text-text3 mt-1">Au-delà de ce seuil, une alerte est déclenchée</p>

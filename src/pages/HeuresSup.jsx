@@ -112,8 +112,53 @@ export default function HeuresSup() {
             )}
           </div>
 
-          {/* Table */}
-          <div className="card overflow-hidden">
+          {/* Mobile cards */}
+          <div className="sm:hidden flex flex-col gap-3 mb-4">
+            {filtered.map((h) => {
+              const f = formateurs.find(x => x.id === h.formateurId)
+              const exceeded = f && f.totalHS > f.quotaMensuel
+              const nearQuota = f && (f.totalHS / f.quotaMensuel) >= 0.8 && !exceeded
+              return (
+                <div key={h.id} className={`card p-4 ${exceeded ? 'border-l-4 border-danger' : nearQuota ? 'border-l-4 border-warning' : ''}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ backgroundColor: h.couleur }}>{h.avatar}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-text1">{h.formateur}</p>
+                      <p className="text-xs text-text3 truncate">{h.session}</p>
+                    </div>
+                    <StatusBadge status={h.statut} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="bg-bg rounded-xl p-2 text-center">
+                      <p className="text-sm font-bold text-text1">{h.heures}h</p>
+                      <p className="text-[10px] text-text3">Heures</p>
+                    </div>
+                    <div className="bg-bg rounded-xl p-2 text-center">
+                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${h.type === 'HSA' ? 'bg-primary-light text-primary' : 'bg-accent-light text-accent'}`}>{h.type}</span>
+                      <p className="text-[10px] text-text3 mt-1">Type</p>
+                    </div>
+                    <div className="bg-bg rounded-xl p-2 text-center">
+                      <p className="text-sm font-bold text-primary">{(h.montantFinal / 1000).toFixed(1)}k</p>
+                      <p className="text-[10px] text-text3">MAD</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text3">{h.date} · +{h.majoration}%</span>
+                    {h.statut === 'En attente' && (
+                      <div className="flex gap-1">
+                        <button onClick={() => validateOne(h.id)} className="w-8 h-8 rounded-xl bg-success/10 hover:bg-success flex items-center justify-center text-success hover:text-white transition-all"><CheckCircle size={14} /></button>
+                        <button onClick={() => refuseOne(h.id)} className="w-8 h-8 rounded-xl bg-danger/10 hover:bg-danger flex items-center justify-center text-danger hover:text-white transition-all"><XCircle size={14} /></button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {filtered.length === 0 && <p className="text-center text-text3 py-8">Aucune heure supplémentaire trouvée</p>}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

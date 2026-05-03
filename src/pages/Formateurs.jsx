@@ -68,8 +68,51 @@ export default function Formateurs() {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="card overflow-hidden">
+      {/* Mobile cards */}
+      <div className="sm:hidden flex flex-col gap-3 mb-5">
+        {paginated.map((f) => {
+          const exceeded = f.statut === 'Quota dépassé'
+          return (
+            <div key={f.id} className={`card p-4 ${exceeded ? 'border-l-4 border-danger' : ''}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style={{ backgroundColor: f.couleur }}>{f.avatar}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-text1 text-sm">{f.nom}</p>
+                  <p className="text-xs text-text3 truncate">{f.specialite} · {f.grade}</p>
+                </div>
+                <StatusBadge status={f.statut} />
+              </div>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="bg-bg rounded-xl p-2 text-center">
+                  <p className="text-sm font-bold text-primary">{f.hsaMois}h</p>
+                  <p className="text-[10px] text-text3">HSA</p>
+                </div>
+                <div className="bg-bg rounded-xl p-2 text-center">
+                  <p className="text-sm font-bold text-accent">{f.hseMois}h</p>
+                  <p className="text-[10px] text-text3">HSE</p>
+                </div>
+                <div className="bg-bg rounded-xl p-2 text-center">
+                  <p className={`text-sm font-bold ${exceeded ? 'text-danger' : 'text-text1'}`}>{f.totalHS}h</p>
+                  <p className="text-[10px] text-text3">Total</p>
+                </div>
+              </div>
+              <QuotaBar used={f.totalHS} total={f.quotaMensuel} />
+              <div className="flex items-center justify-end gap-1 mt-3">
+                <button onClick={() => setSelectedFormateur(f)} className="w-8 h-8 rounded-xl hover:bg-primary-light flex items-center justify-center text-text3 hover:text-primary transition-colors"><Eye size={14} /></button>
+                <button className="w-8 h-8 rounded-xl hover:bg-bg flex items-center justify-center text-text3 hover:text-text1 transition-colors"><Edit2 size={14} /></button>
+                <button className="w-8 h-8 rounded-xl hover:bg-accent-light flex items-center justify-center text-text3 hover:text-accent transition-colors"><Clock size={14} /></button>
+              </div>
+            </div>
+          )
+        })}
+        <div className="flex items-center justify-between px-1">
+          <span className="text-sm text-text3">{filtered.length} formateur(s)</span>
+          <div className="flex gap-1">{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-sm font-medium ${p === page ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>{p}</button>)}</div>
+        </div>
+      </div>
+
+      {/* Table (desktop) */}
+      <div className="hidden sm:block card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -152,15 +195,7 @@ export default function Formateurs() {
           <span className="text-sm text-text3">{filtered.length} formateur(s) trouvé(s)</span>
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                  p === page ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'
-                }`}
-              >
-                {p}
-              </button>
+              <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${p === page ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>{p}</button>
             ))}
           </div>
         </div>
@@ -201,7 +236,7 @@ function FormateurDetail({ formateur: f }) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Sessions/mois', value: f.sessionsParMois, color: 'text-text1' },
           { label: 'HS ce mois', value: `${f.totalHS}h`, color: 'text-primary' },

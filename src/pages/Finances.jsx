@@ -111,9 +111,9 @@ export default function Finances() {
 
       {/* Transactions table */}
       <div className="card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
           <p className="font-bold text-text1">Transactions récentes</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <select className="input text-sm py-1.5" value={filterType} onChange={e => setFilterType(e.target.value)}>
               <option>Tous</option>
               <option>Recette</option>
@@ -130,7 +130,30 @@ export default function Finances() {
             </select>
           </div>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Mobile cards */}
+        <div className="sm:hidden divide-y divide-border">
+          {filtered.map(t => (
+            <div key={t.id} className="px-4 py-3 flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-text1 truncate">{t.libelle}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-text3">{t.date}</span>
+                  <span className="text-xs font-semibold bg-bg text-text2 px-1.5 py-0.5 rounded-lg">{t.categorie}</span>
+                </div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className={`text-sm font-bold ${t.type === 'Recette' ? 'text-success' : 'text-danger'}`}>
+                  {t.type === 'Recette' ? '+' : ''}{Math.abs(t.montant).toLocaleString('fr-MA')} MAD
+                </p>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${t.type === 'Recette' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>{t.type}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-bg">
@@ -164,9 +187,10 @@ export default function Finances() {
             </tbody>
           </table>
         </div>
-        <div className="px-5 py-3 border-t border-border flex justify-between items-center bg-bg">
+
+        <div className="px-5 py-3 border-t border-border flex flex-wrap justify-between items-center gap-3 bg-bg">
           <span className="text-sm text-text3">{filtered.length} transaction(s)</span>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
             <span className="text-text2">Recettes: <span className="font-bold text-success">{totalRecettes.toLocaleString('fr-MA')} MAD</span></span>
             <span className="text-text2">Dépenses: <span className="font-bold text-danger">{totalDepenses.toLocaleString('fr-MA')} MAD</span></span>
             <span className="text-text2">Solde: <span className="font-bold text-primary">{(totalRecettes - totalDepenses).toLocaleString('fr-MA')} MAD</span></span>

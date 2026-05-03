@@ -123,7 +123,47 @@ export default function Sessions() {
       {view === 'calendar' ? (
         <CalendarView sessions={filtered} />
       ) : (
-        <div className="card overflow-hidden">
+        <>
+          {/* Mobile cards */}
+          <div className="sm:hidden flex flex-col gap-3 mb-5">
+            {paginated.map((s) => (
+              <div key={s.id} className="card p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="font-bold text-sm text-text1 leading-snug flex-1">{s.intitule}</p>
+                  <StatusBadge status={s.statut} />
+                </div>
+                <p className="text-xs text-text3 mb-3">{s.formateur} · {s.salle}</p>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-bg rounded-xl p-2 text-center">
+                    <p className="text-sm font-bold text-text1">{s.inscrits}<span className="text-text3 font-normal">/{s.places}</span></p>
+                    <p className="text-[10px] text-text3">Inscrits</p>
+                  </div>
+                  <div className="bg-bg rounded-xl p-2 text-center">
+                    <p className="text-sm font-bold text-text1">{s.duree}</p>
+                    <p className="text-[10px] text-text3">Durée</p>
+                  </div>
+                  <div className="bg-bg rounded-xl p-2 text-center">
+                    <p className="text-sm font-bold text-accent">{s.hsGenerees}h</p>
+                    <p className="text-[10px] text-text3">HS</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-text3">{s.dateDebut} → {s.dateFin}</span>
+                  <div className="flex gap-1">
+                    <button onClick={() => setSelectedSession(s)} className="w-8 h-8 rounded-xl hover:bg-primary-light flex items-center justify-center text-text3 hover:text-primary transition-colors"><Eye size={14} /></button>
+                    <button className="w-8 h-8 rounded-xl hover:bg-bg flex items-center justify-center text-text3 hover:text-text1 transition-colors"><Edit2 size={14} /></button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-1">
+              <span className="text-sm text-text3">{filtered.length} session(s)</span>
+              <div className="flex gap-1">{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-sm font-medium ${p === page ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>{p}</button>)}</div>
+            </div>
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -198,6 +238,7 @@ export default function Sessions() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       <Modal open={!!selectedSession} onClose={() => setSelectedSession(null)} title="Détail Session" size="lg">
@@ -229,7 +270,7 @@ function SessionDetail({ session: s }) {
           <StatusBadge status={s.statut} />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {[
           { label: 'Inscrits', value: `${s.inscrits}/${s.places}`, icon: <Users size={16} /> },
           { label: 'Durée', value: s.duree, icon: <Clock size={16} /> },
@@ -242,7 +283,7 @@ function SessionDetail({ session: s }) {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div className="bg-bg rounded-xl p-3">
           <p className="label mb-1">Date de début</p>
           <p className="font-semibold text-text1">{s.dateDebut}</p>
@@ -318,7 +359,7 @@ function SessionForm({ onClose }) {
         </select>
         {errors.formateur && <p className="text-xs text-danger mt-1">{errors.formateur}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="label block mb-1">Date début</label>
           <input type="date" className={`input w-full ${errors.dateDebut ? 'border-danger' : ''}`} value={form.dateDebut} onChange={e => setForm(p => ({ ...p, dateDebut: e.target.value }))} />
@@ -329,7 +370,7 @@ function SessionForm({ onClose }) {
           <input type="date" className="input w-full" value={form.dateFin} onChange={e => setForm(p => ({ ...p, dateFin: e.target.value }))} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="label block mb-1">Salle</label>
           <select className="input w-full" value={form.salle} onChange={e => setForm(p => ({ ...p, salle: e.target.value }))}>

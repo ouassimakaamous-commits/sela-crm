@@ -91,7 +91,39 @@ export default function Apprenants() {
       </div>
 
       {view === 'table' ? (
-        <div className="card overflow-hidden">
+        <>
+          {/* Mobile cards */}
+          <div className="sm:hidden flex flex-col gap-3 mb-5">
+            {paginated.map((a) => (
+              <div key={a.id} className={`card p-4 ${bulk.includes(a.id) ? 'border border-primary' : ''}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <input type="checkbox" className="rounded flex-shrink-0" checked={bulk.includes(a.id)} onChange={() => toggleBulk(a.id)} />
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ backgroundColor: a.couleur }}>{a.avatar}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-text1">{a.nom}</p>
+                    <p className="text-xs text-text3 truncate">{a.filiere} · {a.age} ans</p>
+                  </div>
+                  <StatusBadge status={a.statut} />
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-1 mb-3">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${a.financement === 'OPCO' ? 'bg-primary-light text-primary' : a.financement === 'CPF' ? 'bg-accent-light text-accent' : 'bg-bg text-text2'}`}>{a.financement}</span>
+                  <span className="text-xs text-text3">{a.dateInscription}</span>
+                </div>
+                <p className="text-xs text-text3 truncate mb-3">{a.session}</p>
+                <div className="flex justify-end gap-1">
+                  <button onClick={() => setSelected(a)} className="w-8 h-8 rounded-xl hover:bg-primary-light flex items-center justify-center text-text3 hover:text-primary transition-colors"><Eye size={14} /></button>
+                  <button className="w-8 h-8 rounded-xl hover:bg-bg flex items-center justify-center text-text3 hover:text-text1 transition-colors"><Edit2 size={14} /></button>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-1">
+              <span className="text-sm text-text3">{filtered.length} apprenant(s)</span>
+              <div className="flex gap-1">{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-sm font-medium ${p === page ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>{p}</button>)}</div>
+            </div>
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -161,6 +193,7 @@ export default function Apprenants() {
             </div>
           </div>
         </div>
+        </>
       ) : (
         <KanbanView apprenants={filtered} onSelect={setSelected} />
       )}
