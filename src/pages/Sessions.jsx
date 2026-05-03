@@ -4,7 +4,9 @@ import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
-import { sessions, formateurs } from '../data/mockData'
+import { formateurs } from '../data/mockData'
+import { useStore } from '../context/StoreContext'
+import toast from 'react-hot-toast'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, parseISO, addMonths, subMonths } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -152,6 +154,7 @@ function CalendarView({ sessions }) {
 }
 
 export default function Sessions() {
+  const { sessions, addSession } = useStore()
   const [view, setView] = useState('table')
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('Tous')
@@ -328,7 +331,7 @@ export default function Sessions() {
       </Modal>
 
       <SlidePanel open={showAdd} onClose={() => setShowAdd(false)} title="Nouvelle Session">
-        <SessionForm onClose={() => setShowAdd(false)} />
+        <SessionForm onClose={() => setShowAdd(false)} onAdd={addSession} />
       </SlidePanel>
     </div>
   )
@@ -412,7 +415,7 @@ function SessionDetail({ session: s }) {
   )
 }
 
-function SessionForm({ onClose }) {
+function SessionForm({ onClose, onAdd }) {
   const [form, setForm] = useState({ intitule: '', formateur: '', dateDebut: '', dateFin: '', salle: '', places: '', financement: '', description: '' })
   const [errors, setErrors] = useState({})
 
@@ -423,6 +426,8 @@ function SessionForm({ onClose }) {
     if (!form.formateur) errs.formateur = 'Formateur requis'
     if (!form.dateDebut) errs.dateDebut = 'Date début requise'
     if (Object.keys(errs).length) { setErrors(errs); return }
+    onAdd(form)
+    toast.success(`Session « ${form.intitule.split(' ').slice(0, 4).join(' ')}... » créée`)
     onClose()
   }
 

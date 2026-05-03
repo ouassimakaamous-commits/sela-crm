@@ -8,9 +8,12 @@ import StatusBadge from '../components/common/StatusBadge'
 import QuotaBar from '../components/common/QuotaBar'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
-import { formateurs, hsHistoriqueAnnuel, heuresSup } from '../data/mockData'
+import { hsHistoriqueAnnuel, heuresSup } from '../data/mockData'
+import { useStore } from '../context/StoreContext'
+import toast from 'react-hot-toast'
 
 export default function Formateurs() {
+  const { formateurs, addFormateur } = useStore()
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('Tous')
   const [selectedFormateur, setSelectedFormateur] = useState(null)
@@ -208,7 +211,7 @@ export default function Formateurs() {
 
       {/* Add Panel */}
       <SlidePanel open={showAddPanel} onClose={() => setShowAddPanel(false)} title="Nouveau Formateur">
-        <FormateurForm onClose={() => setShowAddPanel(false)} />
+        <FormateurForm onClose={() => setShowAddPanel(false)} onAdd={addFormateur} />
       </SlidePanel>
     </div>
   )
@@ -307,7 +310,7 @@ function FormateurDetail({ formateur: f }) {
   )
 }
 
-function FormateurForm({ onClose }) {
+function FormateurForm({ onClose, onAdd }) {
   const [form, setForm] = useState({ nom: '', email: '', telephone: '', specialite: '', grade: '', tauxHoraire: '' })
   const [errors, setErrors] = useState({})
 
@@ -324,6 +327,8 @@ function FormateurForm({ onClose }) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
+    onAdd(form)
+    toast.success(`Formateur « ${form.nom} » ajouté avec succès`)
     onClose()
   }
 

@@ -4,7 +4,8 @@ import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
-import { apprenants } from '../data/mockData'
+import { useStore } from '../context/StoreContext'
+import toast from 'react-hot-toast'
 
 const KANBAN_COLUMNS = [
   { id: 'Prospect', label: 'Prospect', color: 'border-text3 bg-text3/5' },
@@ -15,6 +16,7 @@ const KANBAN_COLUMNS = [
 ]
 
 export default function Apprenants() {
+  const { apprenants, addApprenant } = useStore()
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('Tous')
   const [filterFinancement, setFilterFinancement] = useState('Tous')
@@ -203,7 +205,7 @@ export default function Apprenants() {
       </Modal>
 
       <SlidePanel open={showAdd} onClose={() => setShowAdd(false)} title="Nouvel Apprenant">
-        <ApprenantForm onClose={() => setShowAdd(false)} />
+        <ApprenantForm onClose={() => setShowAdd(false)} onAdd={addApprenant} />
       </SlidePanel>
     </div>
   )
@@ -275,7 +277,7 @@ function ApprenantDetail({ apprenant: a }) {
   )
 }
 
-function ApprenantForm({ onClose }) {
+function ApprenantForm({ onClose, onAdd }) {
   const [form, setForm] = useState({ nom: '', age: '', filiere: '', financement: '', statut: 'Inscrit' })
   const [errors, setErrors] = useState({})
 
@@ -285,6 +287,8 @@ function ApprenantForm({ onClose }) {
     if (!form.nom.trim()) errs.nom = 'Nom requis'
     if (!form.filiere) errs.filiere = 'Filière requise'
     if (Object.keys(errs).length) { setErrors(errs); return }
+    onAdd(form)
+    toast.success(`Apprenant « ${form.nom} » ajouté avec succès`)
     onClose()
   }
 
