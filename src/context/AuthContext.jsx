@@ -2,19 +2,23 @@ import { createContext, useContext, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 
 export const ROLES = {
-  ADMIN: 'admin',
-  APPRENANT: 'apprenant',
+  ADMIN:     'admin',
   FORMATEUR: 'formateur',
+  APPRENANT: 'apprenant',
 }
 
-const USERS = [
-  {
-    email: 'admin@centresela.ma',
-    password: 'SelaAdmin2026!',
-    role: ROLES.ADMIN,
-    name: 'Administrateur',
-  },
+const STORAGE_KEY = 'sela_users'
+
+const SEED_USERS = [
+  { id: 0, email: 'admin@centresela.ma', password: 'SelaAdmin2026!', role: ROLES.ADMIN, name: 'Administrateur', statut: 'Actif' },
 ]
+
+function getStoredUsers() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : SEED_USERS
+  } catch { return SEED_USERS }
+}
 
 const AuthContext = createContext(null)
 
@@ -28,7 +32,12 @@ export function AuthProvider({ children }) {
 
   const login = (email, password) => {
     const normalized = email.toLowerCase().trim()
-    const found = USERS.find(u => u.email === normalized && u.password === password)
+    const users = getStoredUsers()
+    const found = users.find(u =>
+      u.email.toLowerCase() === normalized &&
+      u.password === password &&
+      u.statut !== 'Inactif'
+    )
     if (!found) return { success: false }
     const userData = { email: found.email, role: found.role, name: found.name, loggedAt: Date.now() }
     localStorage.setItem('sela_auth', JSON.stringify(userData))
@@ -50,9 +59,9 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => useContext(AuthContext)
 
-export function ProtectedRoute({ children, requiredRole }) {
+export function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
-  if (requiredRole && user.role !== requiredRole) return <Navigate to="/dashboard" replace />
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/dashboard" replace />
   return children
 }

@@ -16,7 +16,7 @@ const ROLE_CONFIG = {
 }
 
 const DEFAULT_USERS = [
-  { id: 1, name: 'Administrateur', email: 'admin@centresela.ma', role: 'admin', statut: 'Actif', createdAt: '2025-01-01' },
+  { id: 0, name: 'Administrateur', email: 'admin@centresela.ma', password: 'SelaAdmin2026!', role: 'admin', statut: 'Actif', createdAt: '2025-01-01' },
 ]
 
 function loadUsers() {
@@ -59,6 +59,7 @@ export default function Utilisateurs() {
     const id   = Date.now()
     const entry = {
       id, name: data.name, email: data.email.toLowerCase().trim(),
+      password: data.password,
       role: data.role, statut: 'Actif',
       createdAt: new Date().toISOString().slice(0, 10),
     }

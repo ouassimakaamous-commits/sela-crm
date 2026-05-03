@@ -39,16 +39,16 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard"   element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
-              <Route path="/formateurs"  element={<ProtectedRoute><Layout><Formateurs /></Layout></ProtectedRoute>} />
-              <Route path="/apprenants"  element={<ProtectedRoute><Layout><Apprenants /></Layout></ProtectedRoute>} />
-              <Route path="/sessions"    element={<ProtectedRoute><Layout><Sessions /></Layout></ProtectedRoute>} />
-              <Route path="/heures-sup"  element={<ProtectedRoute><Layout><HeuresSup /></Layout></ProtectedRoute>} />
-              <Route path="/documents"   element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
-              <Route path="/finances"    element={<ProtectedRoute><Layout><Finances /></Layout></ProtectedRoute>} />
-              <Route path="/rapports"    element={<ProtectedRoute><Layout><Rapports /></Layout></ProtectedRoute>} />
-              <Route path="/parametres"  element={<ProtectedRoute><Layout><Parametres /></Layout></ProtectedRoute>} />
-              <Route path="/utilisateurs" element={<ProtectedRoute><Layout><Utilisateurs /></Layout></ProtectedRoute>} />
+              <Route path="/dashboard"    element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+              <Route path="/formateurs"   element={<ProtectedRoute allowedRoles={['admin']}><Layout><Formateurs /></Layout></ProtectedRoute>} />
+              <Route path="/apprenants"   element={<ProtectedRoute allowedRoles={['admin']}><Layout><Apprenants /></Layout></ProtectedRoute>} />
+              <Route path="/sessions"     element={<ProtectedRoute><Layout><Sessions /></Layout></ProtectedRoute>} />
+              <Route path="/heures-sup"   element={<ProtectedRoute allowedRoles={['admin','formateur']}><Layout><HeuresSup /></Layout></ProtectedRoute>} />
+              <Route path="/documents"    element={<ProtectedRoute allowedRoles={['admin']}><Layout><Documents /></Layout></ProtectedRoute>} />
+              <Route path="/finances"     element={<ProtectedRoute allowedRoles={['admin']}><Layout><Finances /></Layout></ProtectedRoute>} />
+              <Route path="/rapports"     element={<ProtectedRoute allowedRoles={['admin']}><Layout><Rapports /></Layout></ProtectedRoute>} />
+              <Route path="/parametres"   element={<ProtectedRoute><Layout><Parametres /></Layout></ProtectedRoute>} />
+              <Route path="/utilisateurs" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Utilisateurs /></Layout></ProtectedRoute>} />
             </Routes>
           </StoreProvider>
         </LogoProvider>
