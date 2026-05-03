@@ -1,11 +1,59 @@
 import { useState } from 'react'
-import { Download, TrendingUp, TrendingDown, DollarSign, PieChart as PieIcon, BarChart2 } from 'lucide-react'
+import { Download, TrendingUp, TrendingDown, DollarSign, PieChart as PieIcon, BarChart2, RefreshCw } from 'lucide-react'
 import {
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Legend, CartesianGrid
 } from 'recharts'
 import PageHeader from '../components/common/PageHeader'
 import { financesMensuellesData, repartitionDepensesData, transactions } from '../data/mockData'
+
+async function exportComptable() {
+  const XLSX = await import('xlsx')
+  const { saveAs } = await import('file-saver')
+
+  const wb = XLSX.utils.book_new()
+
+  // ── Sheet 1 : Transactions ───────────────────────────────────────────────
+  const txHeader = ['Date', 'Libellé', 'Catégorie', 'Type', 'Montant (MAD)']
+  const txRows   = transactions.map(t => [
+    t.date, t.libelle, t.categorie, t.type,
+    t.type === 'Recette' ? t.montant : -Math.abs(t.montant),
+  ])
+  const totalRec  = transactions.filter(t => t.type === 'Recette').reduce((s, t) => s + t.montant, 0)
+  const totalDep  = transactions.filter(t => t.type === 'Dépense').reduce((s, t) => s + Math.abs(t.montant), 0)
+  txRows.push(['', '', '', 'TOTAL Recettes', totalRec])
+  txRows.push(['', '', '', 'TOTAL Dépenses', -totalDep])
+  txRows.push(['', '', '', 'SOLDE', totalRec - totalDep])
+
+  const wsTx = XLSX.utils.aoa_to_sheet([txHeader, ...txRows])
+  wsTx['!cols'] = [{ wch: 12 }, { wch: 42 }, { wch: 20 }, { wch: 14 }, { wch: 16 }]
+  XLSX.utils.book_append_sheet(wb, wsTx, 'Transactions')
+
+  // ── Sheet 2 : Récapitulatif mensuel ──────────────────────────────────────
+  const recapHeader = ['Mois', 'Recettes (MAD)', 'Dépenses (MAD)', 'Solde (MAD)']
+  const recapRows   = financesMensuellesData.map(f => [
+    f.mois, f.recettes, f.depenses, f.recettes - f.depenses,
+  ])
+  const totRec2 = financesMensuellesData.reduce((s, f) => s + f.recettes, 0)
+  const totDep2 = financesMensuellesData.reduce((s, f) => s + f.depenses, 0)
+  recapRows.push(['TOTAL', totRec2, totDep2, totRec2 - totDep2])
+
+  const wsRecap = XLSX.utils.aoa_to_sheet([recapHeader, ...recapRows])
+  wsRecap['!cols'] = [{ wch: 8 }, { wch: 18 }, { wch: 18 }, { wch: 14 }]
+  XLSX.utils.book_append_sheet(wb, wsRecap, 'Récapitulatif Mensuel')
+
+  // ── Sheet 3 : Répartition des dépenses ───────────────────────────────────
+  const repHeader = ['Catégorie', 'Part (%)']
+  const repRows   = repartitionDepensesData.map(d => [d.name, d.value])
+  const wsRep = XLSX.utils.aoa_to_sheet([repHeader, ...repRows])
+  wsRep['!cols'] = [{ wch: 26 }, { wch: 10 }]
+  XLSX.utils.book_append_sheet(wb, wsRep, 'Répartition Dépenses')
+
+  // ── Save ─────────────────────────────────────────────────────────────────
+  const date = new Date().toISOString().slice(0, 10)
+  const buf  = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([buf], { type: 'application/octet-stream' }), `export-comptable-sela-${date}.xlsx`)
+}
 
 function KPI({ label, value, trend, trendUp, color, icon: Icon }) {
   return (
@@ -29,7 +77,13 @@ function KPI({ label, value, trend, trendUp, color, icon: Icon }) {
 
 export default function Finances() {
   const [filterType, setFilterType] = useState('Tous')
-  const [filterCat, setFilterCat] = useState('Tous')
+  const [filterCat, setFilterCat]   = useState('Tous')
+  const [exporting, setExporting]   = useState(false)
+
+  const handleExport = async () => {
+    setExporting(true)
+    try { await exportComptable() } finally { setExporting(false) }
+  }
 
   const filtered = transactions.filter(t => {
     const mt = filterType === 'Tous' || t.type === filterType
@@ -46,8 +100,16 @@ export default function Finances() {
         title="Finances"
         subtitle="Suivi budgétaire et comptable"
         extra={
-          <button className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-border transition-colors">
-            <Download size={14} /> Export comptable
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-border transition-colors disabled:opacity-50"
+          >
+            {exporting
+              ? <RefreshCw size={14} className="animate-spin" />
+              : <Download size={14} />
+            }
+            Export comptable
           </button>
         }
       />
