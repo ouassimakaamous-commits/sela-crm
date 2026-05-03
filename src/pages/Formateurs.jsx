@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Download, Eye, Edit2, Clock, TrendingUp } from 'lucide-react'
+import { Search, Download, Eye, Edit2, Clock, TrendingUp, FileUp } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts'
@@ -8,12 +8,23 @@ import StatusBadge from '../components/common/StatusBadge'
 import QuotaBar from '../components/common/QuotaBar'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
+import ExcelImportModal from '../components/common/ExcelImportModal'
 import { hsHistoriqueAnnuel, heuresSup } from '../data/mockData'
 import { useStore } from '../context/StoreContext'
 import toast from 'react-hot-toast'
 
+const IMPORT_FIELDS_F = [
+  { key: 'nom',        label: 'Nom complet', required: true  },
+  { key: 'email',      label: 'Email',       required: true  },
+  { key: 'telephone',  label: 'Téléphone',   required: false },
+  { key: 'specialite', label: 'Spécialité',  required: false },
+  { key: 'grade',      label: 'Grade',       required: false },
+  { key: 'tauxHoraire',label: 'Taux horaire',required: false },
+]
+
 export default function Formateurs() {
   const { formateurs, addFormateur } = useStore()
+  const [showImport, setShowImport] = useState(false)
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('Tous')
   const [selectedFormateur, setSelectedFormateur] = useState(null)
@@ -38,9 +49,17 @@ export default function Formateurs() {
         onAdd={() => setShowAddPanel(true)}
         addLabel="Nouveau Formateur"
         extra={
-          <button className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-border transition-colors">
-            <Download size={14} /> Export Excel
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary-light hover:text-primary hover:border-primary/30 transition-colors"
+            >
+              <FileUp size={14} /> Importer Excel
+            </button>
+            <button className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-border transition-colors">
+              <Download size={14} /> Exporter
+            </button>
+          </div>
         }
       />
 
@@ -213,6 +232,14 @@ export default function Formateurs() {
       <SlidePanel open={showAddPanel} onClose={() => setShowAddPanel(false)} title="Nouveau Formateur">
         <FormateurForm onClose={() => setShowAddPanel(false)} onAdd={addFormateur} />
       </SlidePanel>
+
+      <ExcelImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        fields={IMPORT_FIELDS_F}
+        onImport={addFormateur}
+        entityName="formateurs"
+      />
     </div>
   )
 }

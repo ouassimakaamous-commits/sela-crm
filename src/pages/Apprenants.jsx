@@ -1,11 +1,20 @@
 import { useState } from 'react'
-import { Search, Download, Eye, Edit2, LayoutGrid, List, CheckSquare } from 'lucide-react'
+import { Search, Download, Eye, Edit2, LayoutGrid, List, FileUp } from 'lucide-react'
 import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import Modal from '../components/common/Modal'
 import SlidePanel from '../components/common/SlidePanel'
+import ExcelImportModal from '../components/common/ExcelImportModal'
 import { useStore } from '../context/StoreContext'
 import toast from 'react-hot-toast'
+
+const IMPORT_FIELDS = [
+  { key: 'nom',          label: 'Nom complet',  required: true  },
+  { key: 'age',          label: 'Âge',          required: false },
+  { key: 'filiere',      label: 'Filière',      required: false },
+  { key: 'financement',  label: 'Financement',  required: false },
+  { key: 'statut',       label: 'Statut',       required: false },
+]
 
 const KANBAN_COLUMNS = [
   { id: 'Prospect', label: 'Prospect', color: 'border-text3 bg-text3/5' },
@@ -23,6 +32,7 @@ export default function Apprenants() {
   const [view, setView] = useState('table')
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [page, setPage] = useState(1)
   const [bulk, setBulk] = useState([])
   const perPage = 8
@@ -53,6 +63,12 @@ export default function Apprenants() {
                 {bulk.length} sélectionné(s)
               </span>
             )}
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary-light hover:text-primary hover:border-primary/30 transition-colors"
+            >
+              <FileUp size={14} /> Importer Excel
+            </button>
             <button className="flex items-center gap-2 bg-bg border border-border text-text2 px-3 py-2 rounded-xl text-sm font-medium hover:bg-border transition-colors">
               <Download size={14} /> Exporter
             </button>
@@ -207,6 +223,14 @@ export default function Apprenants() {
       <SlidePanel open={showAdd} onClose={() => setShowAdd(false)} title="Nouvel Apprenant">
         <ApprenantForm onClose={() => setShowAdd(false)} onAdd={addApprenant} />
       </SlidePanel>
+
+      <ExcelImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        fields={IMPORT_FIELDS}
+        onImport={addApprenant}
+        entityName="apprenants"
+      />
     </div>
   )
 }
