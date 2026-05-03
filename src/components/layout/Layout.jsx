@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom'
 import { ChevronRight, Menu, Bell } from 'lucide-react'
 import Sidebar from './Sidebar'
 import AlertsPanel from './AlertsPanel'
-import UserAvatar from './UserAvatar'
 
 const BREADCRUMB_MAP = {
   '/dashboard':    'Tableau de Bord',
@@ -86,7 +85,7 @@ export default function Layout({ children }) {
             <span className="font-semibold text-primary">{currentPage}</span>
           </div>
 
-          {/* Right: bell + avatar */}
+          {/* Right: bell */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setAlertsOpen(o => !o)}
@@ -97,7 +96,6 @@ export default function Layout({ children }) {
                 <span className="text-[7px] text-white font-bold leading-none">{UNREAD_COUNT}</span>
               </span>
             </button>
-            <UserAvatar size="md" />
           </div>
         </div>
 
