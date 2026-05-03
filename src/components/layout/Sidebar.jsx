@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, GraduationCap, Calendar,
   Clock, FileText, DollarSign, BarChart2, Settings,
-  LogOut, X, ChevronLeft, ChevronRight, Pin, PinOff
+  LogOut, X, ChevronLeft, ChevronRight, Pin, PinOff, UserCog
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLogo } from '../../context/LogoContext'
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { icon: FileText,        path: '/documents',   label: 'Documents' },
   { icon: DollarSign,      path: '/finances',    label: 'Finances' },
   { icon: BarChart2,       path: '/rapports',    label: 'Rapports' },
+  { icon: UserCog,         path: '/utilisateurs', label: 'Utilisateurs' },
 ]
 
 export default function Sidebar({ mobileOpen, onClose, expanded, locked, onToggle, onToggleLock }) {

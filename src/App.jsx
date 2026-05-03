@@ -14,6 +14,7 @@ import Documents from './pages/Documents'
 import Finances from './pages/Finances'
 import Rapports from './pages/Rapports'
 import Parametres from './pages/Parametres'
+import Utilisateurs from './pages/Utilisateurs'
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
               <Route path="/finances"    element={<ProtectedRoute><Layout><Finances /></Layout></ProtectedRoute>} />
               <Route path="/rapports"    element={<ProtectedRoute><Layout><Rapports /></Layout></ProtectedRoute>} />
               <Route path="/parametres"  element={<ProtectedRoute><Layout><Parametres /></Layout></ProtectedRoute>} />
+              <Route path="/utilisateurs" element={<ProtectedRoute><Layout><Utilisateurs /></Layout></ProtectedRoute>} />
             </Routes>
           </StoreProvider>
         </LogoProvider>
