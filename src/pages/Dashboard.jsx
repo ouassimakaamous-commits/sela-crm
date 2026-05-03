@@ -400,7 +400,7 @@ function QuickActions() {
   return (
     <div className="mt-4">
       <p className="text-sm font-bold text-text2 mb-3">Actions Rapides</p>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {actions.map((a) => {
           const Icon = a.icon
           return (
@@ -426,23 +426,23 @@ export default function Dashboard() {
       <PageHeader title="Tableau de Bord" subtitle="Vue d'ensemble — Centre de formation SELA" />
 
       {/* ROW 1: 3 big KPI cards */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <CardActiviteHebdo />
         <CardHeuresSup />
         <CardBudget />
       </div>
 
       {/* ROW 2: 3 medium cards */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <CardSessionsActives />
         <CardTopFormateurs />
         <CardDepenses />
       </div>
 
       {/* ROW 3: 2 wide cards */}
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-3"><CardApprenants /></div>
-        <div className="col-span-2"><CardFinancement /></div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="lg:col-span-3"><CardApprenants /></div>
+        <div className="lg:col-span-2"><CardFinancement /></div>
       </div>
 
       {/* ROW 4: Alerts + Quick Actions */}

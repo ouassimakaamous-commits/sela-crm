@@ -53,7 +53,7 @@ export default function Finances() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPI label="Budget total" value="142 500 MAD" trend="+9% vs 2023" trendUp={true} color="bg-primary" icon={DollarSign} />
         <KPI label="Dépenses HS" value="27 850 MAD" trend="+4.2% vs mois dernier" trendUp={false} color="bg-warning" icon={TrendingDown} />
         <KPI label="Financement OPCO" value="102 600 MAD" trend="Reçu ce mois" trendUp={true} color="bg-success" icon={TrendingUp} />
@@ -61,9 +61,9 @@ export default function Finances() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Bar chart */}
-        <div className="col-span-3 card p-5">
+        <div className="lg:col-span-3 card p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="font-bold text-text1">Recettes vs Dépenses (2025)</p>
             <BarChart2 size={16} className="text-text3" />
@@ -82,7 +82,7 @@ export default function Finances() {
         </div>
 
         {/* Pie chart */}
-        <div className="col-span-2 card p-5">
+        <div className="lg:col-span-2 card p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="font-bold text-text1">Répartition des dépenses</p>
             <PieIcon size={16} className="text-text3" />

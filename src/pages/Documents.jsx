@@ -45,7 +45,7 @@ export default function Documents() {
       />
 
       {/* Quick generate buttons */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
         {[
           { label: 'Générer une attestation', icon: Award, color: 'text-primary bg-primary-light hover:bg-primary hover:text-white' },
           { label: 'Générer une convention', icon: BookOpen, color: 'text-accent bg-accent-light hover:bg-accent hover:text-white' },
@@ -95,7 +95,7 @@ export default function Documents() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((doc) => {
           const Icon = categoryIcons[doc.categorie] || FileText
           return (

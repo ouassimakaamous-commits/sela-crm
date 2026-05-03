@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bell, ChevronRight } from 'lucide-react'
+import { Bell, ChevronRight, LogOut, Menu } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { useLogo } from '../../context/LogoContext'
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -23,28 +25,45 @@ const breadcrumbMap = {
   '/parametres': 'Paramètres',
 }
 
-const avatars = [
-  { initials: 'KA', color: '#00839F' },
-  { initials: 'FZ', color: '#DCA35A' },
-  { initials: 'MT', color: '#7C3AED' },
-]
-
-export default function TopBar() {
+export default function TopBar({ onMenuToggle }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, logout } = useAuth()
+  const { logo } = useLogo()
   const current = breadcrumbMap[location.pathname] || 'Page'
 
+  const initials = user?.name
+    ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    : 'SA'
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
-    <div className="fixed top-0 left-16 right-0 z-40">
+    <div className="fixed top-0 left-0 right-0 md:left-16 z-40">
       {/* Main nav bar */}
-      <div className="bg-white border-b border-border px-6 h-16 flex items-center justify-between gap-4">
+      <div className="bg-white border-b border-border px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+
+        {/* Hamburger (mobile) */}
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-text2 hover:bg-bg transition-colors flex-shrink-0"
+        >
+          <Menu size={20} />
+        </button>
+
         {/* Logo */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          <SelaLogo />
+          {logo
+            ? <img src={logo} alt="Logo SELA" className="h-8 max-w-[100px] object-contain" />
+            : <SelaLogo />
+          }
         </div>
 
-        {/* Center tabs */}
-        <nav className="flex items-center gap-1 overflow-x-auto">
+        {/* Center tabs (hidden on mobile) */}
+        <nav className="hidden md:flex items-center gap-1 overflow-x-auto">
           {navItems.map((item) => {
             const active = location.pathname === item.path
             return (
@@ -60,34 +79,29 @@ export default function TopBar() {
         </nav>
 
         {/* Right actions */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Avatar stack */}
-          <div className="flex -space-x-2">
-            {avatars.map((av, i) => (
-              <div
-                key={i}
-                className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white"
-                style={{ backgroundColor: av.color }}
-              >
-                {av.initials}
-              </div>
-            ))}
-          </div>
-          <button className="text-xs font-semibold text-text2 bg-bg px-3 py-1.5 rounded-lg hover:bg-border transition-colors">
-            Partagé
-          </button>
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <button className="relative w-9 h-9 rounded-xl bg-bg hover:bg-border flex items-center justify-center transition-colors">
             <Bell size={16} className="text-text2" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
           </button>
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-xs font-bold cursor-pointer">
-            SA
+          <div
+            className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-xs font-bold cursor-pointer"
+            title={user?.name}
+          >
+            {initials}
           </div>
+          <button
+            onClick={handleLogout}
+            title="Se déconnecter"
+            className="w-9 h-9 rounded-xl bg-bg hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-text3 transition-colors"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
 
       {/* Breadcrumb */}
-      <div className="bg-bg/80 backdrop-blur border-b border-border px-6 h-9 flex items-center gap-2 text-sm text-text3">
+      <div className="bg-bg/80 backdrop-blur border-b border-border px-4 md:px-6 h-9 flex items-center gap-2 text-sm text-text3">
         <span className="font-medium text-text2">Centre SELA</span>
         <ChevronRight size={14} />
         <span className="font-semibold text-primary">{current}</span>

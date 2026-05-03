@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Save, Upload, User, Bell, Link2, Shield, Clock, DollarSign } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Save, Upload, Trash2, User, Bell, Link2, Shield, Clock, DollarSign } from 'lucide-react'
+import { useLogo } from '../context/LogoContext'
 
 const TABS = [
   { id: 'centre', label: 'Centre', icon: User },
@@ -54,12 +55,12 @@ export default function Parametres() {
         </button>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Tab nav */}
-        <div className="w-52 flex-shrink-0">
-          <div className="card p-2 flex flex-col gap-1">
+        <div className="w-full md:w-52 flex-shrink-0">
+          <div className="card p-2 flex flex-row md:flex-col gap-1 overflow-x-auto">
             {TABS.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setActiveTab(id)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${activeTab === id ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>
+              <button key={id} onClick={() => setActiveTab(id)} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 whitespace-nowrap ${activeTab === id ? 'bg-primary text-white' : 'text-text2 hover:bg-bg'}`}>
                 <Icon size={16} />
                 {label}
               </button>
@@ -68,7 +69,7 @@ export default function Parametres() {
         </div>
 
         {/* Tab content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {activeTab === 'centre' && <TabCentre />}
           {activeTab === 'quotas' && <TabQuotas />}
           {activeTab === 'tarifs' && <TabTarifs />}
@@ -101,10 +102,29 @@ function Field({ label, children }) {
 
 function TabCentre() {
   const [form, setForm] = useState({ nom: 'Centre SELA', adresse: '12 Rue Al Massira, Casablanca 20000', telephone: '+212 5 22 12 34 56', email: 'contact@centresela.ma', web: 'www.centresela.ma', siret: 'MA-123456789' })
+  const { logo, setLogo } = useLogo()
+  const fileInputRef = useRef(null)
+  const [logoError, setLogoError] = useState('')
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLogoError('')
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError('Fichier trop lourd — max 2 MB.')
+      e.target.value = ''
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (ev) => setLogo(ev.target.result)
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
   return (
     <>
       <Section title="Informations du centre">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { key: 'nom', label: 'Nom du centre' },
             { key: 'email', label: 'Email principal' },
@@ -124,20 +144,47 @@ function TabCentre() {
 
       <Section title="Logo du centre">
         <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-2xl bg-bg border border-border flex items-center justify-center">
-            <div className="text-center">
-              <div className="flex items-end gap-1 justify-center">
-                <div className="w-2 h-10 bg-primary rounded" />
-                <div className="w-2 h-7 bg-accent rounded" />
-              </div>
-              <span className="text-xs font-extrabold text-text1 mt-1 block">SELA</span>
-            </div>
+          {/* Preview */}
+          <div className="w-24 h-24 rounded-2xl bg-bg border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+            {logo
+              ? <img src={logo} alt="Logo centre" className="w-full h-full object-contain p-2" />
+              : (
+                <div className="text-center">
+                  <div className="flex items-end gap-1 justify-center">
+                    <div className="w-2 h-10 bg-primary rounded" />
+                    <div className="w-2 h-7 bg-accent rounded" />
+                  </div>
+                  <span className="text-xs font-extrabold text-text1 mt-1 block">SELA</span>
+                </div>
+              )
+            }
           </div>
+
+          {/* Actions */}
           <div>
-            <button className="flex items-center gap-2 btn-ghost border border-border mb-2">
+            <input
+              type="file"
+              accept=".png,.jpg,.jpeg,.svg,.webp"
+              ref={fileInputRef}
+              onChange={handleLogoUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 btn-ghost border border-border mb-2"
+            >
               <Upload size={14} /> Importer un logo
             </button>
-            <p className="text-xs text-text3">PNG, SVG — 512×512px recommandé</p>
+            {logo && (
+              <button
+                onClick={() => setLogo(null)}
+                className="flex items-center gap-2 text-xs text-red-500 hover:text-red-600 font-medium mb-2 transition-colors"
+              >
+                <Trash2 size={13} /> Supprimer le logo
+              </button>
+            )}
+            <p className="text-xs text-text3">PNG, JPG, SVG, WebP — max 2 MB</p>
+            {logoError && <p className="text-xs text-red-500 mt-1">{logoError}</p>}
           </div>
         </div>
       </Section>

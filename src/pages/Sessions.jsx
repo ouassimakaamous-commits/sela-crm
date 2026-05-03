@@ -103,7 +103,7 @@ export default function Sessions() {
       />
 
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text3" />
           <input className="input w-full pl-9" placeholder="Rechercher une session..." value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} />

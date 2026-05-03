@@ -74,7 +74,7 @@ export default function HeuresSup() {
       />
 
       {/* KPI Row */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label="Total HSA ce mois" value={`${totalHSA}h`} sub="Heures supplémentaires A" color="text-primary" bgColor="bg-primary-light" icon={Clock} />
         <KPICard label="Total HSE ce mois" value={`${totalHSE}h`} sub="Heures supplémentaires E" color="text-accent" bgColor="bg-accent-light" icon={Clock} />
         <KPICard label="Montant total brut" value={`${(montantTotal / 1000).toFixed(1)}k MAD`} sub="Heures validées" color="text-success" bgColor="bg-success/10" icon={CheckCircle} />
@@ -82,7 +82,7 @@ export default function HeuresSup() {
       </div>
 
       {/* Main content + quota sidebar */}
-      <div className="flex gap-5">
+      <div className="flex flex-col lg:flex-row gap-5">
         <div className="flex-1 min-w-0">
           {/* Filters */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -216,7 +216,7 @@ export default function HeuresSup() {
         </div>
 
         {/* Quota Sidebar */}
-        <div className="w-72 flex-shrink-0">
+        <div className="w-full lg:w-72 lg:flex-shrink-0">
           <div className="card p-4">
             <p className="font-bold text-text1 mb-4">Quota par formateur</p>
             <div className="space-y-4">

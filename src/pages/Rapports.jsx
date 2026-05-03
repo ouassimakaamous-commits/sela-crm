@@ -18,7 +18,7 @@ export default function Rapports() {
       <PageHeader title="Rapports" subtitle="Génération et export des rapports de gestion" />
 
       {/* Date range global */}
-      <div className="card p-4 mb-5 flex items-center gap-4">
+      <div className="card p-4 mb-5 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2 text-sm text-text2 font-medium">
           <Calendar size={15} className="text-primary" />
           Période de référence pour tous les rapports :
@@ -36,7 +36,7 @@ export default function Rapports() {
       </div>
 
       {/* Report cards grid */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {rapports.map((r) => {
           const isGen = generating?.id === r.id
           return (
