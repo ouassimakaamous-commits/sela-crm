@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Search, CheckCircle, XCircle, Clock, AlertTriangle, Upload, Info, CalendarDays } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
+import { Search, CheckCircle, XCircle, Clock, AlertTriangle, Upload, Info, CalendarDays, Paperclip, X as XIcon, FileText, Image } from 'lucide-react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import PageHeader from '../components/common/PageHeader'
@@ -149,7 +149,10 @@ export default function HeuresSup() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-text3">{h.date} · +{h.majoration}%</span>
+                    <span className="text-xs text-text3 flex items-center gap-1.5">
+                      {h.date} · +{h.majoration}%
+                      {h.justificatif && <Paperclip size={11} className="text-primary" title={h.justificatif.name} />}
+                    </span>
                     {h.statut === 'En attente' && (
                       <div className="flex gap-1">
                         <button onClick={() => validateOne(h.id)} className="w-8 h-8 rounded-xl bg-success/10 hover:bg-success flex items-center justify-center text-success hover:text-white transition-all"><CheckCircle size={14} /></button>
@@ -185,6 +188,7 @@ export default function HeuresSup() {
                     <th className="text-center px-3 py-3 label">Majoration</th>
                     <th className="text-center px-3 py-3 label">Final</th>
                     <th className="text-center px-3 py-3 label">Statut</th>
+                    <th className="text-center px-3 py-3 label w-8"><Paperclip size={12} /></th>
                     <th className="text-center px-3 py-3 label">Actions</th>
                   </tr>
                 </thead>
@@ -231,6 +235,14 @@ export default function HeuresSup() {
                         </td>
                         <td className="px-3 py-3 text-center font-bold text-primary">{h.montantFinal.toLocaleString('fr-MA')} MAD</td>
                         <td className="px-3 py-3 text-center"><StatusBadge status={h.statut} /></td>
+                        <td className="px-3 py-3 text-center">
+                          {h.justificatif && (
+                            <a href={h.justificatif.data} download={h.justificatif.name} title={h.justificatif.name}
+                              className="w-7 h-7 rounded-lg bg-primary-light hover:bg-primary inline-flex items-center justify-center text-primary hover:text-white transition-all">
+                              <Paperclip size={12} />
+                            </a>
+                          )}
+                        </td>
                         <td className="px-3 py-3">
                           {h.statut === 'En attente' ? (
                             <div className="flex items-center justify-center gap-1">
@@ -332,7 +344,7 @@ export default function HeuresSup() {
 function HSForm({ onClose }) {
   const [form, setForm] = useState({
     formateur: '', session: '', date: '', type: 'HSA', heures: '',
-    description: '', jourSemaine: 'semaine', plageHoraire: 'jour'
+    description: '', jourSemaine: 'semaine', plageHoraire: 'jour', justificatif: null,
   })
   const [errors, setErrors] = useState({})
 
@@ -467,14 +479,7 @@ function HSForm({ onClose }) {
       </div>
 
       {/* File upload */}
-      <div>
-        <label className="label block mb-1">Pièce justificative</label>
-        <div className="border-2 border-dashed border-border rounded-2xl p-6 text-center hover:border-primary transition-colors cursor-pointer">
-          <Upload size={20} className="mx-auto text-text3 mb-2" />
-          <p className="text-sm text-text3">Glisser-déposer un fichier ou <span className="text-primary font-semibold">parcourir</span></p>
-          <p className="text-xs text-text3 mt-1">PDF, JPG, PNG jusqu'à 10 MB</p>
-        </div>
-      </div>
+      <FileDropZone file={form.justificatif} onFile={f => setForm(p => ({ ...p, justificatif: f }))} />
 
       <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 text-xs text-warning font-medium">
         ⚠️ Cette saisie sera soumise en statut "En attente" et devra être validée par l'administration.
@@ -485,5 +490,91 @@ function HSForm({ onClose }) {
         <button type="submit" className="flex-1 btn-primary">Soumettre pour validation</button>
       </div>
     </form>
+  )
+}
+
+// ── FileDropZone ─────────────────────────────────────────────────────────────
+const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+const ALLOWED  = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
+
+function FileDropZone({ file, onFile }) {
+  const [dragOver, setDragOver] = useState(false)
+  const [error, setError]       = useState('')
+  const inputRef                = useRef(null)
+
+  const processFile = useCallback((f) => {
+    setError('')
+    if (!ALLOWED.includes(f.type)) { setError('Format non accepté. PDF, JPG ou PNG uniquement.'); return }
+    if (f.size > MAX_SIZE)         { setError('Fichier trop lourd. Maximum 10 MB.'); return }
+    const reader = new FileReader()
+    reader.onload = (e) => onFile({ name: f.name, size: f.size, type: f.type, data: e.target.result })
+    reader.readAsDataURL(f)
+  }, [onFile])
+
+  const onDrop = useCallback((e) => {
+    e.preventDefault()
+    setDragOver(false)
+    const f = e.dataTransfer.files[0]
+    if (f) processFile(f)
+  }, [processFile])
+
+  const onInputChange = (e) => {
+    const f = e.target.files[0]
+    if (f) processFile(f)
+  }
+
+  const fileIcon = (type) => {
+    if (type?.startsWith('image/')) return <Image size={20} className="text-blue-500" />
+    return <FileText size={20} className="text-red-500" />
+  }
+
+  const formatSize = (bytes) => bytes < 1024 * 1024
+    ? `${(bytes / 1024).toFixed(0)} KB`
+    : `${(bytes / 1024 / 1024).toFixed(1)} MB`
+
+  return (
+    <div>
+      <label className="label block mb-1">
+        <span className="flex items-center gap-1.5"><Paperclip size={12} /> Pièce justificative</span>
+      </label>
+
+      {file ? (
+        <div className="flex items-center gap-3 p-3 bg-primary-light border border-primary/20 rounded-2xl">
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+            {fileIcon(file.type)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-text1 truncate">{file.name}</p>
+            <p className="text-xs text-text3">{formatSize(file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { onFile(null); if (inputRef.current) inputRef.current.value = '' }}
+            className="w-7 h-7 rounded-lg hover:bg-danger/10 flex items-center justify-center text-text3 hover:text-danger transition-colors flex-shrink-0"
+          >
+            <XIcon size={14} />
+          </button>
+        </div>
+      ) : (
+        <div
+          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all duration-150 ${
+            dragOver ? 'border-primary bg-primary-light scale-[1.01]' : 'border-border hover:border-primary/50 hover:bg-bg'
+          }`}
+        >
+          <Upload size={20} className={`mx-auto mb-2 transition-colors ${dragOver ? 'text-primary' : 'text-text3'}`} />
+          <p className={`text-sm font-medium transition-colors ${dragOver ? 'text-primary' : 'text-text2'}`}>
+            {dragOver ? 'Déposer ici...' : <>Glisser-déposer ou <span className="text-primary font-semibold">parcourir</span></>}
+          </p>
+          <p className="text-xs text-text3 mt-1">PDF, JPG, PNG — max 10 MB</p>
+          <input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={onInputChange} />
+        </div>
+      )}
+
+      {error && <p className="text-xs text-danger mt-1.5 flex items-center gap-1"><XIcon size={11} />{error}</p>}
+    </div>
   )
 }
